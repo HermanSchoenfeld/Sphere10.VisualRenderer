@@ -14,7 +14,7 @@
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
   <ItemGroup>
-    <None Update="README.md" Pack="true" PackagePath="/" />
+    <None Include="..\..\README.md" Pack="true" PackagePath="/" />
     <None Update="THIRD-PARTY-NOTICES.md" Pack="true" PackagePath="/" />
     <None Update="buildTransitive/Sphere10.VisualRenderer.targets" Pack="true" PackagePath="buildTransitive/Sphere10.VisualRenderer.targets" />
     <None Remove="Themes/default/resources/mathjax/LICENSE" />

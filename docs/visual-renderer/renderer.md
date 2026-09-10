@@ -1,6 +1,6 @@
 # Use Sphere10.VisualRenderer independently
 
-`Sphere10.VisualRenderer` targets .NET 10 and has no reference to LocalNotion.Core or Notion.Client. Install the `Sphere10.VisualRenderer` NuGet package or use a project reference and construct a visual document directly. The [package README](../../src/Sphere10.VisualRenderer/README.md) includes a complete CDN-backed example for embedded browsers. If distributing built assemblies, include the renderer's runtime dependencies; copying its DLL alone is insufficient:
+`Sphere10.VisualRenderer` targets .NET 10 and has no reference to LocalNotion.Core or Notion.Client. Install the `Sphere10.VisualRenderer` NuGet package or use a project reference and construct a visual document directly. The [package README](../../README.md) includes a complete CDN-backed example for embedded browsers. If distributing built assemblies, include the renderer's runtime dependencies; copying its DLL alone is insufficient:
 
 ```csharp
 using Sphere10.VisualRenderer;
@@ -48,7 +48,7 @@ The override directory may be absent. For example, adding only `default/paragrap
 
 ## Model and rendering contract
 
-`IRenderer<TOutput>.Render(DocumentBlock, RenderOptions)` accepts only renderer-owned data. `HtmlRenderer` returns `HtmlRenderResult`; `TextRenderer` returns a string. A render does not require an output filesystem path. `RenderSnippet(VisualNode, RenderOptions)` accepts an individual block and renders it without a document frame or page header. The result uses the same HTML/assets or plain-text contract; HTML fragments belong in a host page that loads the selected theme's CSS and scripts. The [package README](../../src/Sphere10.VisualRenderer/README.md) includes executable document, callout, and to-do examples alongside their actual HTML output.
+`IRenderer<TOutput>.Render(DocumentBlock, RenderOptions)` accepts only renderer-owned data. `HtmlRenderer` returns `HtmlRenderResult`; `TextRenderer` returns a string. A render does not require an output filesystem path. `RenderSnippet(VisualNode, RenderOptions)` accepts an individual block and renders it without a document frame or page header. The result uses the same HTML/assets or plain-text contract; HTML fragments belong in a host page that loads the selected theme's CSS and scripts. The [package README](../../README.md) includes executable document, callout, and to-do examples alongside their actual HTML output.
 
 The model contains typed paragraphs, headings, lists, tables, columns, media, references, navigation, database values, dates, people, and rich text. Lists contain items explicitly and select their presentation through `ListBlock.Type` (`ListType`). Media uses `MediaBlock.Type` (`MediaType`); database rows align to their column definitions. `Metadata.SourceId` is opaque provenance, while `Anchor` is the occurrence's DOM identity. No Notion ID format is required. Models are records with init properties and arrays for ordered content. Callers should finish populating arrays before rendering and avoid concurrent mutation; tokens and slots remain keyed dictionaries.
 
@@ -74,7 +74,7 @@ See [tests/README.md](../tests/README.md) for the standalone, theme, projection,
 
 ## Distribution and validation scope
 
-The project embeds its theme manifest and assets and depends on Microsoft.Extensions.FileProviders.Embedded. It has no Notion SDK, AngleSharp, or Sphere10 Framework dependency. This repository owns its version, source, tests, and package tooling under the MIT License. Consumers such as LocalNotion restore its compiled NuGet package. See the [package README](../../src/Sphere10.VisualRenderer/README.md#pack-and-publish-the-package) for build and publication steps.
+The project embeds its theme manifest and assets and depends on Microsoft.Extensions.FileProviders.Embedded. It has no Notion SDK, AngleSharp, or Sphere10 Framework dependency. This repository owns its version, source, tests, and package tooling under the MIT License. Consumers such as LocalNotion restore its compiled NuGet package. See the [package README](../../README.md#pack-and-publish-the-package) for build and publication steps.
 
 A web host must serve the returned asset paths under the configured asset base; the library does not register HTTP endpoints. Existing third-party media may still require network access. The tests verify embedded resources after publishing, HTML structure, in-memory asset routes, and output files. They do not replace browser layout and JavaScript execution checks.
 

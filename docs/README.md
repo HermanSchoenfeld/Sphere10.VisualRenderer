@@ -6,4 +6,4 @@
 | [Themes](visual-renderer/renderer-themes.md) | Embedded themes, overlays, online vs offline assets |
 | [Coverage](visual-renderer/renderer-coverage.md) | Visual model surface and test coverage |
 
-The package README is in [src/Sphere10.VisualRenderer/README.md](../src/Sphere10.VisualRenderer/README.md).
+The package README is in [README.md](../README.md).
