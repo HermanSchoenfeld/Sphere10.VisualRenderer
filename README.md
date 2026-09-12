@@ -248,8 +248,12 @@ dotnet test "tests/Sphere10.VisualRenderer.Tests/Sphere10.VisualRenderer.Tests.c
 .\pack.ps1
 ~~~
 
-The package version follows `Directory.Build.props`. Packed output is written to
-`nuget-packages`. Publish with:
+The package version follows `VersionPrefix` in `Directory.Build.props`. CI supplies
+`BuildRevision` from its workflow run number, producing file versions such as
+`3.1.3.114`. Local builds allocate the next number from `LOCAL-BUILD-NUMBER` in the
+solution folder (gitignored); override with `-p:BuildRevision=1` for `3.1.3.1`. The
+NuGet version remains `3.1.3` and assembly identity remains `3.1.3.0`. Packed output
+is written to `nuget-packages`. Publish with:
 
 ~~~powershell
 .\publish.ps1 -IncludeSymbols -WhatIf
