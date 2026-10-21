@@ -48,6 +48,8 @@ The override directory may be absent. For example, adding only `default/paragrap
 
 ## Model and rendering contract
 
+See the [object-model reference](object-model.md) for the complete type catalogue, containment and inheritance diagrams, rendering contracts and extension points. The [package README](../../README.md#object-model) provides a compact overview.
+
 `IRenderer<TOutput>.Render(DocumentBlock, RenderOptions)` accepts only renderer-owned data. `HtmlRenderer` returns `HtmlRenderResult`; `TextRenderer` returns a string. A render does not require an output filesystem path. `RenderSnippet(VisualNode, RenderOptions)` accepts an individual block and renders it without a document frame or page header. The result uses the same HTML/assets or plain-text contract; HTML fragments belong in a host page that loads the selected theme's CSS and scripts. The [package README](../../README.md) includes executable document, callout, and to-do examples alongside their actual HTML output.
 
 The model contains typed paragraphs, headings, lists, tables, columns, media, references, navigation, database values, dates, people, and rich text. Lists contain items explicitly and select their presentation through `ListBlock.Type` (`ListType`). Media uses `MediaBlock.Type` (`MediaType`); database rows align to their column definitions. `Metadata.SourceId` is opaque provenance, while `Anchor` is the occurrence's DOM identity. No Notion ID format is required. Models are records with init properties and arrays for ordered content. Callers should finish populating arrays before rendering and avoid concurrent mutation; tokens and slots remain keyed dictionaries.
@@ -70,7 +72,7 @@ CMS article and category templates receive `slug` as the sanitized CMS route and
 
 HTML and plain text are the implemented output formats; LocalNotion does not implement PDF rendering. The extraction preserves current unsupported source blocks and text-specific omissions. Deliberate improvements include explicit database column alignment, evaluated boolean formula values, finite traversal with controlled fallbacks, and unique list wrapper identities with valid default colors.
 
-See [tests/README.md](../tests/README.md) for the standalone, theme, projection, integration, characterization, and path regression commands.
+See the [package README's build and test instructions](../../README.md#pack-and-publish-the-package) for this repository's standalone tests. Notion projection, integration, characterization and repository-path regressions belong to the consuming LocalNotion solution.
 
 ## Distribution and validation scope
 

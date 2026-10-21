@@ -6,6 +6,68 @@ Build a visual document in C# and render it to HTML or plain text. An open-sourc
 
 Templates and their defaults are embedded in the assembly. In online mode, the built-in themes use absolute CDN URLs for stylesheets, scripts, and supporting assets. You can display the resulting HTML string in an embedded browser without deploying a themes folder or hosting asset files.
 
+## Object model
+
+The model separates document structure (`VisualNode`), rich-text spans (`VisualInline`) and database cell values (`VisualValue`). Applications construct these records directly or project their source data into them. Ordered arrays describe the content; links, media URLs and reference labels are resolved before rendering.
+
+```mermaid
+classDiagram
+    direction TB
+    class VisualNode {
+        <<abstract>>
+        Metadata Metadata
+        string PlainTextOverride
+    }
+    class DocumentBlock {
+        string Title
+        VisualNode[] Children
+    }
+    class ContainerVisual {
+        <<abstract>>
+        VisualNode[] Children
+    }
+    class ParagraphBlock {
+        VisualInline[] Text
+    }
+    class VisualInline {
+        <<abstract>>
+        TextStyle Style
+    }
+    class VisualValue {
+        <<abstract>>
+    }
+    VisualNode <|-- DocumentBlock
+    VisualNode <|-- ContainerVisual
+    ContainerVisual <|-- ParagraphBlock
+    VisualNode <|-- DatabaseBlock
+    DocumentBlock o-- "0..*" VisualNode : Children and Slots
+    ContainerVisual o-- "0..*" VisualNode : Children
+    ParagraphBlock o-- "0..*" VisualInline : Text
+    VisualInline <|-- TextInline
+    DatabaseBlock o-- "0..*" DatabaseRow : Rows
+    DatabaseRow o-- "0..*" VisualValue : Cells
+```
+
+This overview shows representative types. `DocumentBlock` inherits directly from `VisualNode` and declares its own children and named slots. Lists, tables and columns use their own typed collections. `VisualInline` and `VisualValue` are separate hierarchies, rather than child nodes. The [full object-model reference](docs/visual-renderer/object-model.md) documents every model type, its fields and relationships, plus the renderer, theme and output contracts.
+
+## Rendering flow
+
+Both renderers accept the same visual model and `RenderOptions`. `HtmlRenderer` applies themes and returns HTML with any in-memory assets; `TextRenderer` returns a string without applying HTML themes. `RenderSnippet` accepts an individual `VisualNode` instead of a complete document.
+
+```mermaid
+flowchart TB
+    Source["Application or source adapter"] --> Model["DocumentBlock"]
+    Model --> Html["HtmlRenderer"]
+    Model --> Text["TextRenderer"]
+    Themes["ThemeCatalog<br/>embedded themes and optional overrides"] --> Html
+    Html --> Result["HtmlRenderResult<br/>Html and Assets"]
+    Text --> Plain["string<br/>plain text"]
+    Result --> Host["Application host<br/>display, serve or export"]
+    Plain --> Host
+```
+
+The application owns source access and output delivery. Rendering performs no Notion lookups, network downloads or output-file writes. The [rendering guide](docs/visual-renderer/renderer.md) explains invocation and consumer integration; the [theme guide](docs/visual-renderer/renderer-themes.md) covers snapshots, inheritance, overrides and online/offline assets.
+
 ## Installation
 
 Install from the NuGet feed containing the package:
@@ -267,6 +329,8 @@ unpublished build. Keep nuget.org enabled for Microsoft runtime dependencies.
 
 Usage docs live in [docs/visual-renderer](docs/visual-renderer). The visual
 model may evolve for any consumer; Notion adapters remain in LocalNotion.
+Start with the [object-model reference](docs/visual-renderer/object-model.md)
+for the complete type catalogue and diagrams.
 
 Sphere10.VisualRenderer is licensed under the [MIT License](LICENSE). You may
 use, copy, modify, merge, publish, distribute, sublicense, and sell copies of
