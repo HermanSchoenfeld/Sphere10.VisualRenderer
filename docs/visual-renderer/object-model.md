@@ -78,6 +78,7 @@ The content types are records with init properties. Ordered content uses arrays;
 | Page presentation | `Subtitle`, `Icon`, `CoverUrl`, `TitleOnCover`, `PageStyle` | Rich subtitle and optional icon/cover. `PageStyle` defaults to `"wide"`. |
 | Structure | `Children`, `Slots` | Ordered main content and named typed composition slots. |
 | Frame controls | `RenderFrame`, `ShowPageHeader` | Both default to `true`. `RenderFrame = false` omits the outer HTML document frame. `ShowPageHeader = false` renders children directly instead of the page-content/header wrapper. |
+| Embedded-page visibility | `HideEmbeddedPages` | Defaults to `false`. HTML omits only automatic `ReferenceBlock` widgets marked `IsEmbeddedPage` within the nearest containing document. Nested documents have their own setting; text rendering is unchanged. |
 | Theme composition | `Themes`, `Tokens` | Optional local theme selection and trusted scalar presentation values. |
 
 ```mermaid
@@ -126,11 +127,11 @@ Every type in the following table derives from `VisualNode`, either directly or 
 | `TableBlock` | `VisualNode` | `ColumnCount`, `FirstRowIsHeader`, `FirstColumnIsHeader`, `Rows`: simple rich-text table. |
 | `TableRowBlock` | `VisualNode` | `Cells`: ordered table cells. |
 | `TableCellBlock` | `VisualNode` | `Text`: rich-text cell contents. |
-| `CodeBlock` | `VisualNode` | `Code`, `Language` (default `CodeLanguage.Text`), `Caption`: literal code with syntax-highlighting language. |
+| `CodeBlock` | `VisualNode` | `Code`, `Language` (default `CodeLanguage.Text`), `Caption`: literal code with syntax-highlighting language. `CodeLanguage.Mermaid` selects browser diagram rendering with retained source; see the [Mermaid guide](mermaid.md). |
 | `EquationBlock` | `VisualNode` | `Expression`: display equation. |
 | `DividerBlock` | `VisualNode` | No additional fields; visual/text separator. |
 | `MediaBlock` | `VisualNode` | Media, caption and prepared embed-provider fields described below. |
-| `ReferenceBlock` | `VisualNode` | `Reference`: a resolved block-level link. |
+| `ReferenceBlock` | `VisualNode` | `Reference`: a resolved block-level link. `IsEmbeddedPage` marks a contained page's parent-facing reference; defaults to false. |
 | `BreadcrumbBlock` | `VisualNode` | `Items`: prepared ancestry links and current-page markers. |
 | `TableOfContentsBlock` | `VisualNode` | `Color`, `Entries`: navigation marker plus optional prepared text entries. |
 | `DatabaseBlock` | `VisualNode` | `Columns`, `Rows`: ordered typed records and values. |
@@ -219,6 +220,10 @@ The specialized renderers use their respective inline payloads; inheriting `Styl
 The media `AltText` field is retained by the model but is not forwarded by the current built-in image renderer. The default image template emits an empty `alt`; the CMS image template uses the rendered caption. Supplying `AltText` alone therefore does not change built-in image alternative text. Image icons use their separate `Icon.AltText` field.
 
 `ReferenceBlock`, `ReferenceInline`, `ReferenceValue`, `BreadcrumbItem` and `TocEntry` reuse the same `Reference` descriptor. Preparing links once keeps rendering independent of repository paths and source identifiers. A breadcrumb's ancestry and availability are caller decisions, not a traversal of linked source pages.
+
+Set `ReferenceBlock.IsEmbeddedPage` only for a page contained by the current document. Set `DocumentBlock.HideEmbeddedPages` to omit those automatic widgets from HTML within that document. The nearest containing `DocumentBlock` owns this behavior, so a nested document's default `false` does not inherit suppression from an outer document. This is an explicit model control, not a Theme name. Ordinary block references, authored text links and inline references remain visible, and an independently rendered destination keeps its body. The source adapter supplies the containment distinction and behavior; it must not infer containment from a URL, title or source identifier. Plain-text reference output is unchanged.
+
+Visible embedded references still use the `embedded_page.html` presentation slot; its default `{contents}` preserves the existing block-reference markup. Custom Themes can style that slot through the ordinary template cascade. The standalone renderer does not interpret application-specific CMS Tags.
 
 ## Database records and values
 

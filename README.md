@@ -227,6 +227,8 @@ The `Environment = RenderEnvironment.Online` setting is explicit: the default en
 
 Use `RenderSnippet` with an individual visual block. These examples reuse `renderer` and `options` from above.
 
+`CodeLanguage.Mermaid` renders diagram code as SVG in the browser, with a **Diagram source** disclosure and per-diagram error handling. Serve the returned runtime assets even in online mode; these pinned resources do not depend on a separately published CDN path. See [Mermaid diagrams](docs/visual-renderer/mermaid.md) for document/snippet examples, asset delivery and host integration.
+
 ### Callout
 
 ```csharp
@@ -285,7 +287,7 @@ webView.NavigateToString(html);
 
 The host application supplies its browser control; the renderer package has no dependency on WebView2. [`NavigateToString`](https://learn.microsoft.com/en-us/dotnet/api/microsoft.web.webview2.wpf.webview2.navigatetostring) displays a complete HTML string without writing an HTML file. WebView2 limits this API to 2 MB of HTML; larger documents can be served through the host application's HTTP or virtual-resource mechanism.
 
-Other embedded browsers can use their equivalent HTML-string loading API. The built-in online themes require no local asset server.
+Other embedded browsers can use their equivalent HTML-string loading API. The example above requires no local asset server. Documents containing Mermaid also return runtime assets, which the host must serve or export.
 
 ## Optional template overrides and offline rendering
 
@@ -331,6 +333,10 @@ Usage docs live in [docs/visual-renderer](docs/visual-renderer). The visual
 model may evolve for any consumer; Notion adapters remain in LocalNotion.
 Start with the [object-model reference](docs/visual-renderer/object-model.md)
 for the complete type catalogue and diagrams.
+
+Read the [design and extension guide](docs/visual-renderer/design.md) to understand
+the rendering pipeline, model and adapter boundaries, Theme resolution, resource
+ownership, and how to change and test the library without breaking consumers.
 
 Sphere10.VisualRenderer is licensed under the [MIT License](LICENSE). You may
 use, copy, modify, merge, publish, distribute, sublicense, and sell copies of
