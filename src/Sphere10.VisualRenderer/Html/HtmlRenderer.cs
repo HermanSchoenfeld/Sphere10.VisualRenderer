@@ -23,6 +23,8 @@ namespace Sphere10.VisualRenderer;
 
 public class HtmlRenderer : RecursiveRendererBase<HtmlRenderResult> {
 
+	private const string _mermaidRuntimeMarker = "<!--sphere10-mermaid-runtime-->";
+
 	private readonly ThemeCatalog _themes;
 
 	private int _toggleCount;
@@ -55,6 +57,13 @@ public class HtmlRenderer : RecursiveRendererBase<HtmlRenderResult> {
 
 	protected override HtmlRenderResult RenderDocument(DocumentBlock document, RenderOptions options) {
 		var html = Render((VisualNode)document);
+		var runtimeIndex = html.IndexOf(_mermaidRuntimeMarker, StringComparison.Ordinal);
+		if (runtimeIndex >= 0) {
+			// Slots can be rendered and discarded. Load the runtime only for markers surviving final composition.
+			var session = LoadThemes([".mermaid"]);
+			var runtime = session.Expand(session.GetTemplate("mermaid_runtime"));
+			html = html[..runtimeIndex] + runtime + html[(runtimeIndex + _mermaidRuntimeMarker.Length)..].Replace(_mermaidRuntimeMarker, string.Empty, StringComparison.Ordinal);
+		}
 		return new HtmlRenderResult(html, _assets.Values.OrderBy(asset => asset.RelativePath, StringComparer.Ordinal).ToArray()) {
 			SuppressFormatting = SuppressFormatting
 		};
@@ -282,22 +291,32 @@ public class HtmlRenderer : RecursiveRendererBase<HtmlRenderResult> {
 	}
 
 	protected virtual string RenderPageContent(DocumentBlock page) {
+		var hasCover = !string.IsNullOrEmpty(page.CoverUrl);
 		var useCoverTitle = page.TitleOnCover;
+		var title = Render(page.Title);
+		var subtitle = page.Subtitle.Length > 0 ? Render(page.Subtitle) : string.Empty;
+		var subtitleOnCover = hasCover && useCoverTitle && subtitle.Length > 0 &&
+			_theme.Tokens.TryGetValue("page_subtitle_placement", out var subtitlePlacement) &&
+			string.Equals(Convert.ToString(subtitlePlacement, CultureInfo.InvariantCulture), "cover", StringComparison.Ordinal);
+		var cover = hasCover ? RenderTemplate(
+			"page_cover",
+			new RenderTokens {
+				["cover_url"] = Encode(CssUrl(page.CoverUrl), true, false, false),
+				["cover_title"] = useCoverTitle ? RenderTemplate("page_cover_title", new() {
+					["text"] = title,
+					["cover_subtitle"] = subtitleOnCover ? RenderTemplate("page_cover_subtitle", new() { ["subtitle"] = subtitle, ["description"] = subtitle }) : string.Empty
+				}) : string.Empty
+			}
+		) : string.Empty;
 		return RenderTemplate(
 			"page_content",
 			new RenderTokens(page) {
 				["id"] = Encode(RenderingContext.GetAnchor(page), true, false, false),
-				["title"] = Render(page.Title),
+				["title"] = title,
 				["page_name"] = Render(page.Name),
-				["page_title"] = RenderTemplate("page_title", new() { ["text"] = !useCoverTitle ? Render(page.Title) : string.Empty }),
-				["page_subtitle"] = page.Subtitle.Length > 0 ? RenderTemplate("page_subtitle", new() { ["subtitle"] = Render(page.Subtitle), ["description"] = Render(page.Subtitle) }) : string.Empty,
-				["page_cover"] = string.IsNullOrEmpty(page.CoverUrl) ? string.Empty : RenderTemplate(
-					"page_cover",
-					new RenderTokens {
-						["cover_url"] = Encode(CssUrl(page.CoverUrl), true, false, false),
-						["cover_title"] = useCoverTitle ? RenderTemplate("page_cover_title", new() { ["text"] = Render(page.Title) }) : string.Empty
-					}
-				),
+				["page_title"] = RenderTemplate("page_title", new() { ["text"] = !useCoverTitle ? title : string.Empty }),
+				["page_subtitle"] = subtitle.Length > 0 && !subtitleOnCover ? RenderTemplate("page_subtitle", new() { ["subtitle"] = subtitle, ["description"] = subtitle }) : string.Empty,
+				["page_cover"] = cover,
 				["thumbnail"] = page.Icon switch {
 					{ Emoji.Length: > 0 } => RenderTemplate(
 						!string.IsNullOrEmpty(page.CoverUrl) ? "thumbnail_emoji_on_cover" : "thumbnail_emoji",
@@ -423,11 +442,22 @@ public class HtmlRenderer : RecursiveRendererBase<HtmlRenderResult> {
 					}
 				);
 
-	protected override string Render(ReferenceBlock block) => RenderReference(block.Reference, false);
+	protected override string Render(ReferenceBlock block) {
+		// Visibility belongs to the nearest document, independently of presentation themes.
+		if (block.IsEmbeddedPage && RenderingContext.RenderingStack.OfType<DocumentBlock>().LastOrDefault()?.HideEmbeddedPages == true)
+			return string.Empty;
+		var contents = RenderReference(block.Reference, false);
+		return block.IsEmbeddedPage
+			? RenderTemplate("embedded_page", new RenderTokens(block) { ["contents"] = contents })
+			: contents;
+	}
 
 	protected override string Render(RawHtmlBlock block) => block.Html;
 
 	protected override string Render(CodeBlock block) {
+		if (block.Language == CodeLanguage.Mermaid)
+			return RenderMermaid(block);
+
 		var rawCode = block.Code;
 		var lang = typeof(CodeLanguage).GetField(block.Language.ToString())?.GetCustomAttribute<DescriptionAttribute>()?.Description ?? "text";
 
@@ -437,6 +467,17 @@ public class HtmlRenderer : RecursiveRendererBase<HtmlRenderResult> {
 				["language"] = lang,
 				["code"] = Encode(rawCode, true, true, false),
 				["raw_code"] = rawCode
+			}
+		);
+	}
+
+	protected virtual string RenderMermaid(CodeBlock block) {
+		return RenderTemplate(
+			"mermaid",
+			new RenderTokens(block) {
+				["code"] = Encode(block.Code, true, false, false),
+				["caption"] = Render(block.Caption),
+				["runtime"] = _mermaidRuntimeMarker
 			}
 		);
 	}

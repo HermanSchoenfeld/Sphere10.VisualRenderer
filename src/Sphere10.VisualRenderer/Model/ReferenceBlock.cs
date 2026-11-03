@@ -10,4 +10,7 @@ namespace Sphere10.VisualRenderer;
 
 public sealed record ReferenceBlock : VisualNode {
 	public Reference Reference { get; init; } = new();
+
+	/// <summary>Marks a contained page's parent-facing reference, independently of its destination document.</summary>
+	public bool IsEmbeddedPage { get; init; }
 }

@@ -19,7 +19,17 @@
     <None Update="buildTransitive/Sphere10.VisualRenderer.targets" Pack="true" PackagePath="buildTransitive/Sphere10.VisualRenderer.targets" />
     <None Remove="Themes/default/resources/mathjax/LICENSE" />
     <None Include="Themes/default/resources/mathjax/LICENSE" Pack="true" PackagePath="third-party/MathJax/" />
+    <None Include="Themes/.mermaid/resources/mermaid/LICENSE.txt" Pack="true" PackagePath="third-party/Mermaid/" />
+    <None Include="Themes/.mermaid/resources/mermaid/DOMPurify-LICENSE.txt" Pack="true" PackagePath="third-party/Mermaid/" />
     <EmbeddedResource Include="Themes/**/*" Exclude="Themes/**/*.cs" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" />
+  </ItemGroup>
+  <!-- Source references retain the same legal notices as the NuGet buildTransitive target. -->
+  <ItemGroup>
+    <None Include="../../LICENSE" Link="licenses/Sphere10.VisualRenderer/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" Pack="false" />
+    <None Update="THIRD-PARTY-NOTICES.md" Link="licenses/Sphere10.VisualRenderer/THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Update="Themes/default/resources/mathjax/LICENSE" Link="licenses/Sphere10.VisualRenderer/third-party/MathJax/LICENSE" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Update="Themes/.mermaid/resources/mermaid/LICENSE.txt" Link="licenses/Sphere10.VisualRenderer/third-party/Mermaid/LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+    <None Update="Themes/.mermaid/resources/mermaid/DOMPurify-LICENSE.txt" Link="licenses/Sphere10.VisualRenderer/third-party/Mermaid/DOMPurify-LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
   </ItemGroup>
 </Project>

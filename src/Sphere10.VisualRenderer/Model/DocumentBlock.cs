@@ -41,6 +41,9 @@ public sealed record DocumentBlock : VisualNode {
 
 	public bool ShowPageHeader { get; init; } = true;
 
+	/// <summary>Omit automatic references to contained pages from HTML within this document's scope.</summary>
+	public bool HideEmbeddedPages { get; init; }
+
 	public VisualNode[] Children { get; init; } = Array.Empty<VisualNode>();
 
 	public string[] Themes { get; init; } = Array.Empty<string>();
